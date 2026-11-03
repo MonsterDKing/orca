@@ -156,8 +156,14 @@ function verifyTarget(resourcesDir, templateDir, target, value, schemaVersion) {
   requireExactNames(listFiles(targetDir), inventory, `${target} file inventory`)
 }
 
+// Local builds: ORCA_LOCAL_ORCAD_TARGETS=linux-x64-glibc packages a host-only template.
+function defaultTemplateTargets(env = process.env) {
+  const local = (env.ORCA_LOCAL_ORCAD_TARGETS ?? '').split(',').filter(Boolean)
+  return local.length > 0 ? local : ORCAD_TEMPLATE_TARGETS
+}
+
 /** `targets` narrows the inventory for a CI-only partial template; packaging checks them all. */
-function verifyPackagedOrcadTemplate(resourcesDir, targets = ORCAD_TEMPLATE_TARGETS) {
+function verifyPackagedOrcadTemplate(resourcesDir, targets = defaultTemplateTargets()) {
   const templateDir = join(resourcesDir, 'orcad-template')
   const manifest = requireRecord(readManifest(templateDir), 'manifest')
   if (![TEMPLATE_SCHEMA_VERSION, 4].includes(manifest.schemaVersion)) {
