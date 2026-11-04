@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import type { PluginMarketplaceHostSourceState } from '../../../../../preload/api-types'
 import { isSameGitRepository } from '../../../../../shared/plugins/catalog/plugin-marketplace'
@@ -57,7 +58,7 @@ export function usePluginInstallLink({
     if (!catalogToAdd) {
       return
     }
-    await window.api.plugins.addMarketplace(catalogToAdd.source)
+    await hostPluginsApi()!.addMarketplace(catalogToAdd.source)
     await loadMarketplaceData()
     usePluginPreviewRequestStore.setState({ catalogToAdd: null })
     openRef.current?.(catalogToAdd.pluginKey)

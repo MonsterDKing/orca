@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { toast } from 'sonner'
 import { translate } from '@/i18n/i18n'
 import { extractIpcErrorMessage } from '@/lib/ipc-error'
@@ -111,7 +112,7 @@ export function createPluginNewFileActions(
 ): Pick<EditorSlice, 'openNewPluginFileInActiveWorkspace' | 'openBlankFileInActiveWorkspace'> {
   return {
     openNewPluginFileInActiveWorkspace: async (newFile, groupId) => {
-      const readTemplate = window.api?.plugins?.readNewFileTemplate
+      const readTemplate = hostPluginsApi()?.readNewFileTemplate
       if (!readTemplate) {
         return
       }

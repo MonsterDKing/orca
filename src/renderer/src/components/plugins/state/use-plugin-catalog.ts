@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type {
   PluginMarketplaceHostInstallPreview,
@@ -22,7 +23,7 @@ function marketplaceError(cause: unknown, fallback: string): string {
 /** Reads each listing's install preview once; a failed read is retried on the next ask. */
 export function createPluginPagePreviewCache(): PluginPreviewCache {
   return new PluginPreviewCache((listing) =>
-    window.api.plugins
+    hostPluginsApi()!
       .previewMarketplacePlugin({
         marketplaceSourceId: listing.marketplaceSourceId,
         pluginKey: listing.pluginKey
@@ -61,8 +62,8 @@ export function usePluginCatalog({
     requestPluginInstallCounts()
     try {
       const [nextSources, nextListings] = await Promise.all([
-        window.api.plugins.listMarketplaces(),
-        window.api.plugins.listMarketplacePlugins()
+        hostPluginsApi()!.listMarketplaces(),
+        hostPluginsApi()!.listMarketplacePlugins()
       ])
       if (mountedRef.current && requestId === requestRef.current) {
         setSources(nextSources)
@@ -102,7 +103,7 @@ export function usePluginCatalog({
     setRefreshBusy(true)
     setError(null)
     try {
-      await Promise.all([window.api.plugins.refreshMarketplaces({}), onRefreshInstalled?.()])
+      await Promise.all([hostPluginsApi()!.refreshMarketplaces({}), onRefreshInstalled?.()])
       await loadMarketplaceData()
     } catch (cause) {
       if (mountedRef.current) {

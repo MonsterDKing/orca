@@ -1,4 +1,5 @@
-import { defineMethod, type RpcContext } from '../core'
+import { defineMethod } from '../core'
+import { bindRpcPanelOwner } from './plugin-panel-rpc-owner'
 import type { PluginFrameEntry } from '../../../../shared/plugins/frames/plugin-frame-bridge'
 import { listPluginsForClients } from '../../../plugins/plugin-client-list'
 import type { PluginHostListEntry } from '../../../../shared/plugins/plugin-list-entry'
@@ -84,17 +85,6 @@ async function listEntryForRpc(pluginKey: string | null): Promise<PluginHostList
 
 async function listForRpc(): Promise<PluginHostListEntry[]> {
   return listPluginsForClients(requirePluginService())
-}
-
-function rpcPanelOwner(context: RpcContext): string {
-  // Bind bearer sessions to individual paired connections, even for sibling sockets of one device.
-  return `runtime:${context.connectionId ?? context.clientId ?? 'local'}`
-}
-
-function bindRpcPanelOwner(service: PluginService, context: RpcContext): string {
-  const ownerKey = rpcPanelOwner(context)
-  service.panels.bindOwnerSignal(ownerKey, context.signal)
-  return ownerKey
 }
 
 export const PLUGIN_METHODS = [
@@ -314,7 +304,8 @@ export const PLUGIN_METHODS = [
     handler: async (params) => {
       const service = requirePluginService()
       await service.whenReady()
-      return service.invokeCommand(params.pluginKey, params.commandId, params.args)
+      const startBy = params.timeoutMs === undefined ? undefined : Date.now() + params.timeoutMs
+      return service.invokeCommand(params.pluginKey, params.commandId, params.args, startBy)
     }
   })
 ]

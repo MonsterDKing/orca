@@ -89,11 +89,11 @@ export function renderPluginsSettingsSection(
   context: SettingsRenderContext
 ): React.JSX.Element | null {
   const { model, view } = context
-  return model.showDesktopOnlySettings ? (
+  return (
     <PluginsSettingsSection
       mounted={view.isSectionMounted('plugins')}
       settings={model.settings}
       updateSettings={model.updateSettingsOrThrow}
     />
-  ) : null
+  )
 }

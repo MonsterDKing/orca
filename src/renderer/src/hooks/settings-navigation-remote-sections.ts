@@ -144,22 +144,18 @@ export function buildRemoteSettingsSections(
       searchEntries: getExperimentalPaneSearchEntries(),
       group: 'experimental'
     },
-    ...(showDesktopOnlySettings
-      ? [
-          {
-            id: 'plugins',
-            title: translate('auto.hooks.useSettingsNavigationMetadata.pluginsTitle', 'Plugins'),
-            description: translate(
-              'auto.hooks.useSettingsNavigationMetadata.pluginsDescription',
-              'Install and manage Orca plugins (Alpha).'
-            ),
-            icon: Blocks,
-            searchEntries: getPluginsPaneSearchEntries(),
-            group: 'experimental',
-            badge: getPluginsSectionPresentation().badge
-          }
-        ]
-      : []),
+    {
+      id: 'plugins',
+      title: translate('auto.hooks.useSettingsNavigationMetadata.pluginsTitle', 'Plugins'),
+      description: translate(
+        'auto.hooks.useSettingsNavigationMetadata.pluginsDescription',
+        'Install and manage Orca plugins (Alpha).'
+      ),
+      icon: Blocks,
+      searchEntries: getPluginsPaneSearchEntries(),
+      group: 'experimental',
+      badge: getPluginsSectionPresentation().badge
+    },
     // Collapse host-specific repo rows to one project entry using the same inputs as settings panes.
     ...buildSettingsProjectList(repos, projectGrouping).map((settingsProject) => {
       const { project, representativeRepoId, setups, checkoutLabel } = settingsProject

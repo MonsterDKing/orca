@@ -65,6 +65,7 @@ vi.mock('../claude/agent-view/agent-view-service', () => ({
 vi.mock('../opencode/opencode-status-plugin-startup-refresh', () => ({
   refreshInstalledOpenCodeStatusPlugins: vi.fn()
 }))
+vi.mock('./orcad-plugins', () => ({ startOrcadPlugins: async () => {} }))
 vi.mock('./orcad-app-paths', () => ({
   resolveOrcadInstallRoot: () => state.root,
   resolveOrcadPath: () => state.root,

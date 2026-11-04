@@ -293,12 +293,10 @@ export function StatusBarSurface({
         data-overflowing={overflowing}
       >
         <div ref={segmentsRef} className="flex w-max items-center gap-3">
+          <PluginsStatusSegment />
+          <PluginStatusBarItems iconOnly={segmentsIconOnly} />
           {!isPairedWebClientWindow() ? (
-            <>
-              <PluginsStatusSegment />
-              <PluginStatusBarItems iconOnly={segmentsIconOnly} />
-              <CaffeinateStatusSegment iconOnly={segmentsIconOnly} />
-            </>
+            <CaffeinateStatusSegment iconOnly={segmentsIconOnly} />
           ) : null}
           <RemoteServerUpdateStatusSegment iconOnly={segmentsIconOnly} />
           <SkillUpdateStatusSegment iconOnly={segmentsIconOnly} />

@@ -18,6 +18,10 @@ export class ElectronSecretStore implements SecretStore {
   describeProtectionGap(): string | null {
     return assessSecretProtection().gap
   }
+
+  assessProtection(): SecretProtectionAssessment {
+    return assessSecretProtection()
+  }
 }
 
 /** `os`: sealed by the OS keyring; `obfuscated`: Linux basic_text built-in key; `unavailable`: no sealing. */

@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useMemo } from 'react'
 import { create } from 'zustand'
 import type { PluginHostListEntry } from '../../../preload/api-types'
@@ -30,7 +31,7 @@ export const usePluginStatusBarStore = create<{ overrides: PluginStatusBarOverri
 let watching = false
 
 function watchPluginStatusBar(): void {
-  const plugins = window.api?.plugins
+  const plugins = hostPluginsApi()
   if (watching || !plugins?.statusBarState || !plugins.onStatusBarChanged) {
     return
   }

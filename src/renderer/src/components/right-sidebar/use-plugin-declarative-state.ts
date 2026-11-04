@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useRef, useState } from 'react'
 import { PLUGIN_DECLARATIVE_MESSAGES } from '../../../../shared/plugins/declarative/plugin-declarative-message-names'
 import {
@@ -16,7 +17,7 @@ async function readState(
   sessionToken: string | null,
   workspace: string | null
 ): Promise<PluginPanelStateSnapshot | null> {
-  const panelState = window.api?.plugins?.panelState
+  const panelState = hostPluginsApi()?.panelState
   if (!sessionToken || !panelState) {
     return null
   }
@@ -100,7 +101,7 @@ export function usePluginDeclarativeState(options: {
       }
       if (event === PLUGIN_DECLARATIVE_MESSAGES.persist) {
         const persist = pluginDeclarativePersistPayloadSchema.safeParse(payload)
-        const panelState = window.api?.plugins?.panelState
+        const panelState = hostPluginsApi()?.panelState
         const token = latest.current.sessionToken
         if (persist.success && panelState && token) {
           void panelState({

@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import type { PluginHostListEntry, PluginHostNewFile } from '../../../preload/api-types'
 import { isLivePlugin, keyedPluginContribution, usePluginListDerived } from './plugin-panels'
 
@@ -24,7 +25,7 @@ export function collectActivePluginNewFiles(
 const collectCreatableNewFiles = (
   plugins: readonly PluginHostListEntry[]
 ): ActivePluginNewFile[] =>
-  window.api?.plugins?.readNewFileTemplate ? collectActivePluginNewFiles(plugins) : []
+  hostPluginsApi()?.readNewFileTemplate ? collectActivePluginNewFiles(plugins) : []
 
 /** New-file types of enabled plugins, sharing the plugin-list refresh. */
 export function usePluginNewFiles(): ActivePluginNewFile[] {

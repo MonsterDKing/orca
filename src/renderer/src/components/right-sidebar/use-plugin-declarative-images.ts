@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useCallback, useEffect, useRef } from 'react'
 
 // A panel draws a handful of images; the cap only bounds a plugin that cycles through many.
@@ -26,7 +27,7 @@ export function usePluginDeclarativeImages(
       if (known) {
         return known
       }
-      const read = window.api?.plugins?.panelImage
+      const read = hostPluginsApi()?.panelImage
       if (!sessionToken || !read || cache.current.size >= MAX_CACHED_IMAGES) {
         return Promise.resolve(null)
       }

@@ -5,7 +5,10 @@ import type { PluginRuntimeDelegate } from './workers/plugin-host-service-bindin
 import type { PluginService } from './plugin-service'
 import { installPluginHookRunner } from './hooks/plugin-hook-participants'
 import { installPluginResidentWorkerWarmer } from './workers/plugin-resident-worker'
-import type { OrcaRuntimeService } from '../runtime/orca-runtime'
+import type { OrcaRuntimeService, RuntimeWorktreeLifecycleEvent } from '../runtime/orca-runtime'
+import { parseWorkspaceKey } from '../../shared/workspace-scope'
+import { shortPluginBranchName } from '../../shared/plugins/events/plugin-events'
+import { notifyWorkspaceCreatedPluginHook } from './hooks/workspace-create-plugin-hook'
 import { pluginRuntimeRpc } from './plugin-runtime-rpc'
 import type { PluginRuntimeRpc } from './workers/plugin-host-workspace-method-bindings'
 import {
@@ -101,6 +104,28 @@ export function createPluginAgentStatusForwarder(
       })
     })
   }
+}
+
+/** `workspace.create.after`, plus the Git-only `workspace.created` and `workspace.removed` events. */
+export function emitPluginWorktreeLifecycle(
+  events: Pick<PluginEvents, 'emitEvent'> | null | undefined,
+  event: RuntimeWorktreeLifecycleEvent
+): void {
+  const identity = { workspaceId: event.worktreeId, kind: 'worktree', path: event.path }
+  const folder = parseWorkspaceKey(event.worktreeId)?.type === 'folder'
+  if (event.kind === 'created') {
+    notifyWorkspaceCreatedPluginHook({ ...event, folder })
+  }
+  // Public worktree events retain their Git-only scope.
+  if (folder) {
+    return
+  }
+  events?.emitEvent(
+    event.kind === 'created' ? 'workspace.created' : 'workspace.removed',
+    event.kind === 'created'
+      ? { ...identity, branch: shortPluginBranchName(event.branch) }
+      : identity
+  )
 }
 
 /** The `workspace.changed` payload for the context as it is now. */

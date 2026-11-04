@@ -50,6 +50,17 @@ const SPECIFIC_PLUGIN_ROUTES = [
     ].join('|'),
     'plugin-git-fixture|plugin-gleam-catalog-fixture'
   ),
+  // A paired desktop reaches panels and workers hosted by orcad, not by its own main process.
+  pluginRoute(
+    'plugins.paired-orcad',
+    ['plugin-paired-orcad'],
+    [
+      'src\\/main\\/orcad\\/orcad-(?:plugins|desktop-push)',
+      'src\\/main\\/runtime\\/rpc\\/methods\\/(?:plugins|plugin-panel-rpc-owner)',
+      'src\\/renderer\\/src\\/runtime\\/runtime-plugins-api',
+      'src\\/renderer\\/src\\/lib\\/plugin-host-api'
+    ].join('|')
+  ),
   pluginRoute(
     'plugins.file-type-suggestion',
     ['plugin-file-type-suggestion'],

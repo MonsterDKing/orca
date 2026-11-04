@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useCallback, useEffect, useState } from 'react'
 import type { PluginDeclaredSettingsSnapshot } from '../../../../../shared/plugins/contributions/plugin-settings-values'
 import type { PluginJsonValue } from '../../../../../shared/plugins/workers/plugin-host-api'
@@ -18,7 +19,7 @@ export function usePluginDeclaredSettings(
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const load = useCallback(async (): Promise<PluginDeclaredSettingsSnapshot | null> => {
-    const read = window.api?.plugins?.getSettings
+    const read = hostPluginsApi()?.getSettings
     return read ? read({ pluginKey }).catch(() => null) : null
   }, [pluginKey])
 
@@ -32,7 +33,7 @@ export function usePluginDeclaredSettings(
 
   const write = useCallback(
     (key: string, value: PluginJsonValue): void => {
-      const setSetting = window.api?.plugins?.setSetting
+      const setSetting = hostPluginsApi()?.setSetting
       if (!setSetting) {
         return
       }

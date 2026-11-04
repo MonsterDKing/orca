@@ -2,18 +2,14 @@ import { ipcMain } from 'electron'
 import { z } from 'zod'
 import type { Store } from '../persistence/loading-store/store'
 import type { PluginHostCallOutcome } from '../../shared/plugins/frames/plugin-protocol'
-import { getUserPluginsDir, getPluginsDataDir } from '../plugins/plugin-discovery'
-import { isBundledPluginKey } from '../plugins/plugin-bundled-bootstrap'
 import {
-  installPluginFromGit,
-  installPluginFromLocalPath,
-  readPluginLockfile,
-  removeInstalledPlugin
-} from '../plugins/installation/plugin-install'
+  installPluginOnHost,
+  removePluginFromHost
+} from '../plugins/installation/plugin-host-install-operations'
 import { applyPluginConsent, applyPluginEnablement } from '../plugins/plugin-enablement'
-import { clearRemovedPluginSettings } from '../plugins/plugin-removal-settings'
 import { readApprovedPluginNewFileTemplate } from '../plugins/plugin-new-file-template'
 import { handlePluginPanelStateRequest } from '../plugins/panels/plugin-panel-state'
+import { getPluginsDataDir } from '../plugins/plugin-discovery'
 import type { PluginService } from '../plugins/plugin-service'
 import { registerPluginFrameEntryHandlers, rendererPanelOwner } from './plugin-frame-entry-ipc'
 import { registerPluginPanelPushHandlers } from './plugin-panel-push-ipc'
@@ -27,16 +23,17 @@ import {
 } from '../plugins/panels/plugin-frame-guest-sessions'
 import { isQualifiedPluginKey } from '../../shared/plugins/manifest/plugin-manifest'
 import { pluginConsentRequestSchema } from '../../shared/plugins/approval/plugin-consent-request'
-import {
-  isAllowedPluginGitUrl,
-  PLUGIN_COMMIT_PATTERN,
-  type PluginLockfile
-} from '../../shared/plugins/installation/plugin-install-lockfile'
+import { isAllowedPluginGitUrl } from '../../shared/plugins/installation/plugin-install-lockfile'
 import { resolvePluginGitSource } from '../plugins/installation/plugin-git-ref-resolution'
 import {
   registerPluginMarketplaceHandlers,
   type PluginMarketplaceHandlerServices
 } from './plugin-marketplaces'
+
+export {
+  canRemoveInstalledPlugin,
+  parsePluginInstallArgs
+} from '../plugins/installation/plugin-host-install-operations'
 
 export function parsePluginConsentArgs(args: unknown): z.infer<typeof pluginConsentRequestSchema> {
   return pluginConsentRequestSchema.parse(args)
@@ -60,45 +57,15 @@ const invokeCommandArgsSchema = z.object({
   timeoutMs: z.number().int().positive().max(60_000).optional()
 })
 
-const installArgsSchema = z.discriminatedUnion('kind', [
-  z.object({ kind: z.literal('local-path'), path: z.string().min(1) }),
-  z.object({
-    kind: z.literal('git'),
-    url: z.string().trim().min(1).refine(isAllowedPluginGitUrl, 'git URL must use HTTPS or SSH'),
-    // Why: installs must stay reproducible even when callers bypass renderer validation.
-    ref: z.string().trim().min(1),
-    /** The commit the dialog showed; install fails if the ref moved since. */
-    expectedCommit: z.string().regex(PLUGIN_COMMIT_PATTERN).optional()
-  })
-])
-
 const resolveGitSourceArgsSchema = z.object({
   url: z.string().trim().min(1).refine(isAllowedPluginGitUrl, 'git URL must use HTTPS or SSH'),
   ref: z.string().trim().max(4096)
 })
 
-export function parsePluginInstallArgs(args: unknown): z.infer<typeof installArgsSchema> {
-  return installArgsSchema.parse(args)
-}
-
-const removeArgsSchema = z.object({
-  pluginKey: z.string().refine(isQualifiedPluginKey, 'invalid qualified plugin key')
-})
 const logsArgsSchema = z.object({ pluginKey: z.string().min(1) })
 
 // Preserve import compatibility; runtime RPC uses the Electron-free client-list module.
 import { listPluginsForClients, readInstalledPluginManifest } from '../plugins/plugin-client-list'
-
-export function canRemoveInstalledPlugin(
-  pluginService: PluginService,
-  pluginKey: string,
-  lock?: PluginLockfile
-): boolean {
-  return (
-    lock?.plugins[pluginKey]?.source.kind !== 'bundled' &&
-    pluginService.getDiscovered().some((plugin) => plugin.pluginKey === pluginKey && !plugin.isDev)
-  )
-}
 
 export function registerPluginHandlers(
   store: Store,
@@ -216,62 +183,13 @@ export function registerPluginHandlers(
     resolvePluginGitSource(resolveGitSourceArgsSchema.parse(args))
   )
 
-  ipcMain.handle('plugins:install', async (_event, args: unknown) => {
-    await pluginService.whenReady()
-    const parsed = parsePluginInstallArgs(args)
-    const pluginsDir = getUserPluginsDir(pluginService.options.userDataPath)
-    const hostVersion = pluginService.options.hostVersion
-    const blockedPluginReason = (pluginKey: string): string | null =>
-      pluginService.options.getPluginKillListEntry?.(pluginKey)?.reason ?? null
-    const result =
-      parsed.kind === 'local-path'
-        ? await installPluginFromLocalPath({
-            pluginsDir,
-            sourcePath: parsed.path,
-            hostVersion,
-            blockedPluginReason
-          })
-        : await installPluginFromGit({
-            pluginsDir,
-            url: parsed.url,
-            ref: parsed.ref,
-            ...(parsed.expectedCommit ? { expectedCommit: parsed.expectedCommit } : {}),
-            hostVersion,
-            blockedPluginReason
-          })
-    if (result.ok) {
-      await pluginService.refresh()
-    }
-    return result
-  })
+  ipcMain.handle('plugins:install', (_event, args: unknown) =>
+    installPluginOnHost(pluginService, args)
+  )
 
-  ipcMain.handle('plugins:remove', async (_event, args: unknown) => {
-    await pluginService.whenReady()
-    const parsed = removeArgsSchema.parse(args)
-    const pluginsDir = getUserPluginsDir(pluginService.options.userDataPath)
-    const lock = await readPluginLockfile(pluginsDir)
-    if (!canRemoveInstalledPlugin(pluginService, parsed.pluginKey, lock)) {
-      throw new Error(`cannot remove protected or non-installed plugin ${parsed.pluginKey}`)
-    }
-    // Why: Orca republishes a copy it ships on the next launch; it must come back off, not on.
-    const { bundledPluginRoot } = pluginService.options
-    const shipped =
-      bundledPluginRoot !== undefined &&
-      (await isBundledPluginKey(bundledPluginRoot, parsed.pluginKey))
-    await pluginService.removePlugin(parsed.pluginKey, () =>
-      removeInstalledPlugin({
-        pluginsDir,
-        pluginsDataDir: getPluginsDataDir(pluginService.options.userDataPath),
-        pluginKey: parsed.pluginKey,
-        // Why before deletion: a crash mid-delete must not leave an approved half-removed plugin.
-        beforeRemove: () =>
-          clearRemovedPluginSettings(store, parsed.pluginKey, { keepDisabled: shipped })
-      })
-    )
-    await clearPluginFrameStorage(parsed.pluginKey)
-    await pluginService.refresh()
-    return listPluginsForClients(pluginService)
-  })
+  ipcMain.handle('plugins:remove', (_event, args: unknown) =>
+    removePluginFromHost(pluginService, store, args, clearPluginFrameStorage)
+  )
 
   ipcMain.handle('plugins:getLogs', async (_event, args: unknown) => {
     const parsed = logsArgsSchema.parse(args)

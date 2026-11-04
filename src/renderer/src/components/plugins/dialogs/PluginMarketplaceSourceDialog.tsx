@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useRef, useState } from 'react'
 import { Loader2, RefreshCw, Trash2 } from 'lucide-react'
 import type { PluginMarketplaceHostSourceState } from '../../../../../preload/api-types'
@@ -53,7 +54,7 @@ export function PluginMarketplaceSourceDialog({
     setBusyAction('add')
     setError(null)
     try {
-      await window.api.plugins.addMarketplace({
+      await hostPluginsApi()!.addMarketplace({
         kind: 'git',
         url: url.trim(),
         ref: gitRef.trim()
@@ -80,7 +81,7 @@ export function PluginMarketplaceSourceDialog({
     setBusyAction(`refresh:${sourceId}`)
     setError(null)
     try {
-      await window.api.plugins.refreshMarketplaces({ sourceId })
+      await hostPluginsApi()!.refreshMarketplaces({ sourceId })
       await onChanged()
     } catch (cause) {
       setError(
@@ -101,7 +102,7 @@ export function PluginMarketplaceSourceDialog({
     setBusyAction(`remove:${sourceId}`)
     setError(null)
     try {
-      await window.api.plugins.removeMarketplace({ sourceId })
+      await hostPluginsApi()!.removeMarketplace({ sourceId })
       await onChanged()
     } catch (cause) {
       setError(

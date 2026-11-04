@@ -5,7 +5,7 @@ import { basename, extname, isAbsolute, posix, relative, resolve } from 'node:pa
 import { readBundledWebClientFiles } from '../../../shared/bundled-web-client-manifest'
 
 const STATIC_WEB_ALLOWED_PATHS = new Set(['/web-index.html'])
-const STATIC_WEB_ALLOWED_PREFIXES = ['/assets/', '/cmaps/', '/standard_fonts/', '/wasm/']
+const STATIC_WEB_ALLOWED_PREFIXES = ['/assets/', '/cmaps/', '/pwa/', '/standard_fonts/', '/wasm/']
 const STATIC_WEB_CONTENT_TYPES = new Map([
   ['.css', 'text/css; charset=utf-8'],
   ['.html', 'text/html; charset=utf-8'],
@@ -14,6 +14,7 @@ const STATIC_WEB_CONTENT_TYPES = new Map([
   ['.png', 'image/png'],
   ['.svg', 'image/svg+xml; charset=utf-8'],
   ['.wasm', 'application/wasm'],
+  ['.webmanifest', 'application/manifest+json; charset=utf-8'],
   ['.webp', 'image/webp'],
   ['.woff2', 'font/woff2']
 ])

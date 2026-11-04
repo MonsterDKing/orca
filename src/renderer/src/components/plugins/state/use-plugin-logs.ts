@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useRef, useState, type MutableRefObject } from 'react'
 import type { PluginHostListEntry, PluginHostLogLine } from '../../../../../preload/api-types'
 import { translate } from '@/i18n/i18n'
@@ -44,7 +45,7 @@ export function usePluginLogs(
     const requestId = ++nextRequestRef.current
     requestsRef.current[pluginKey] = requestId
     setLogsByPlugin((current) => ({ ...current, [pluginKey]: { loading: true } }))
-    void window.api.plugins
+    void hostPluginsApi()!
       .getLogs({ pluginKey })
       .then((lines: PluginHostLogLine[]) => {
         if (mountedRef.current && requestsRef.current[pluginKey] === requestId) {

@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { isQualifiedPluginKey } from '../plugins/manifest/plugin-manifest'
+import { isAllowedPluginGitUrl } from '../plugins/installation/plugin-install-lockfile'
 import {
   PLUGIN_PANEL_REQUEST_MAX_TIMEOUT_MS,
   pluginBridgeNameSchema,
@@ -38,7 +39,9 @@ export const PluginReadPanelEntryParams = z.object({
 export const PluginInvokeCommandParams = z.object({
   pluginKey: z.string().min(1),
   commandId: z.string().min(1),
-  args: z.unknown().optional()
+  args: z.unknown().optional(),
+  /** Run only if the worker can start it within this many ms (a replacement's fallback). */
+  timeoutMs: z.number().int().positive().max(60_000).optional()
 })
 
 export const PluginsPanelActionParams = z.unknown()
@@ -187,4 +190,35 @@ export const PluginShotReplayParams = z.object({
     ),
   colorScheme: z.enum(['light', 'dark']).optional(),
   width: z.number().int().min(PLUGIN_SHOT_MIN_WIDTH).max(PLUGIN_SHOT_MAX_WIDTH).optional()
+})
+
+// Clients of a plugin host that lives on another machine.
+
+export const PluginReadCustomEditorEntryParams = z.object({
+  pluginKey: z.string().min(1),
+  editorId: z.string().min(1)
+})
+
+export const PluginKeyParams = z.object({
+  pluginKey: z.string().refine(isQualifiedPluginKey, 'invalid qualified plugin key')
+})
+
+export const PluginPanelPushParams = z.object({ sessionToken: z.string().min(1).max(256) })
+
+/** Operations validate their own arguments: the desktop's IPC runs the same parsers. */
+export const PluginHostOperationParams = z.object({ args: z.unknown().optional() })
+
+export const PluginSuggestForFileTypeParams = z.object({
+  fileType: z.string().min(1).max(256),
+  purpose: z.enum(['open', 'editor']).optional()
+})
+
+export const PluginSetSettingParams = PluginKeyParams.extend({
+  key: z.string().min(1).max(64),
+  value: z.json()
+})
+
+export const PluginResolveGitSourceParams = z.object({
+  url: z.string().trim().min(1).refine(isAllowedPluginGitUrl, 'git URL must use HTTPS or SSH'),
+  ref: z.string().trim().max(4096)
 })

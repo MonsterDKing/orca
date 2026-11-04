@@ -89,6 +89,7 @@ vi.mock('./orcad-daemon-supervision', () => ({
   stopOrcadDaemon: state.stopDaemon
 }))
 vi.mock('./orcad-health', () => ({ collectOrcadHealth: async () => ({}) }))
+vi.mock('./orcad-plugins', () => ({ startOrcadPlugins: async () => {} }))
 vi.mock('./orcad-automations', () => ({
   startOrcadAutomations: () => {},
   stopOrcadAutomationScheduler: () => {},

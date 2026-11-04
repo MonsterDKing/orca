@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { FRAME_EVENTS } from '../../../../shared/plugins/frames/plugin-frame-bridge'
 import {
@@ -145,7 +146,7 @@ export function usePluginFrameHost(options: {
 
   // Worker posts, subscribed events and data changes for this panel, while its document lives.
   useEffect(() => {
-    const subscribe = window.api?.plugins?.subscribePanelPush
+    const subscribe = hostPluginsApi()?.subscribePanelPush
     if (!frameKey || !sessionToken || !subscribe) {
       return
     }

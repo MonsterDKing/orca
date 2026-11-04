@@ -26,6 +26,7 @@ function fixture() {
     'assets/shared.js',
     'assets/editor.worker.js',
     'cmaps/Font.bcmap',
+    'pwa/orca.webmanifest',
     'standard_fonts/Font.pfb',
     'wasm/viewer.wasm'
   ]
@@ -74,6 +75,8 @@ it('serves only the web closure at root and through a reverse proxy, including w
     }
   }
   expect(await (await fetch(endpoint)).text()).toBe('web-index.html')
+  const manifest = await fetch(`${endpoint}/pwa/orca.webmanifest`)
+  expect(manifest.headers.get('content-type')).toBe('application/manifest+json; charset=utf-8')
   const head = await fetch(`${endpoint}/assets/shared.js`, { method: 'HEAD' })
   expect(head.headers.get('content-length')).toBe(String('assets/shared.js'.length))
   expect(await head.text()).toBe('')
