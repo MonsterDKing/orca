@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import type { PluginMarketplaceHostInstallPreview } from '../../../../../preload/api-types'
@@ -85,7 +86,7 @@ export function PluginUpdateAllDialog({
     void Promise.all(
       plugins.map(async (entry): Promise<UpdateCandidate> => {
         try {
-          const preview = await window.api.plugins.previewMarketplaceUpdate({
+          const preview = await hostPluginsApi()!.previewMarketplaceUpdate({
             pluginKey: entry.pluginKey
           })
           return {
@@ -147,7 +148,7 @@ export function PluginUpdateAllDialog({
     setFailure(null)
     let ok = false
     try {
-      const result = await window.api.plugins.installMarketplacePlugin({
+      const result = await hostPluginsApi()!.installMarketplacePlugin({
         marketplaceSourceId: preview.marketplaceSourceId,
         marketplaceCommit: preview.marketplaceCommit,
         pluginKey: preview.pluginKey,
@@ -156,7 +157,7 @@ export function PluginUpdateAllDialog({
       ok = result.ok
       // Why only on a match: other bytes than the reviewed ones wait for review on the page.
       if (result.ok && result.consentFingerprint === preview.consentFingerprint) {
-        await window.api.plugins.consent({
+        await hostPluginsApi()!.consent({
           pluginKey: preview.pluginKey,
           reviewedFingerprint: preview.consentFingerprint,
           decision: 'approve'
@@ -187,7 +188,7 @@ export function PluginUpdateAllDialog({
         continue
       }
       try {
-        const result = await window.api.plugins.installMarketplacePlugin({
+        const result = await hostPluginsApi()!.installMarketplacePlugin({
           marketplaceSourceId: preview.marketplaceSourceId,
           marketplaceCommit: preview.marketplaceCommit,
           pluginKey: preview.pluginKey,

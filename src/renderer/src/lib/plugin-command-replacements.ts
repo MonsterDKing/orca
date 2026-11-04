@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import type { PluginHostListEntry } from '../../../preload/api-types'
 import { useAppStore } from '@/store'
 import {
@@ -65,7 +66,7 @@ export function runBuiltInOrReplacement(actionId: string, builtIn: () => void): 
   }
   const timer = setTimeout(fallBack, PLUGIN_REPLACEMENT_TIMEOUT_MS)
   // Why the timeout too: a worker that starts after the fallback must not run the command as well.
-  window.api.plugins
+  hostPluginsApi()!
     .invokeCommand({
       pluginKey: command.pluginKey,
       commandId: command.id,

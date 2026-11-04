@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import type { ActivePluginCommand } from '@/store/plugin-panels'
 import { dispatchAppCommand, type AppCommandSource } from './app-command-dispatch'
 
@@ -12,7 +13,7 @@ export async function executePluginCommand(
     }
     return undefined
   }
-  return window.api.plugins.invokeCommand({
+  return hostPluginsApi()!.invokeCommand({
     pluginKey: command.pluginKey,
     commandId: command.id
   })

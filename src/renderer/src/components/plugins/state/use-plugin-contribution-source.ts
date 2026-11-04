@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useMemo, useState } from 'react'
 import type { PluginHostListEntry } from '../../../../../preload/api-types'
 import type { PluginManifest } from '../../../../../shared/plugins/manifest/plugin-manifest'
@@ -73,7 +74,7 @@ export function useInstalledPluginManifest(
       return
     }
     let stale = false
-    window.api.plugins
+    hostPluginsApi()!
       .getInstalledManifest({ pluginKey })
       .then((manifest) => {
         if (!stale) {

@@ -238,6 +238,9 @@ export const ORCAD_ARTIFACTS: readonly OrcadArtifact[] = [
   { filename: 'claude-profile-setup-worker-entry.js' },
   // Dictation loads the recognizer named by orca serve (#31174).
   { filename: 'stt-worker.js' },
+  // Third-party plugin code runs out of process, like on the desktop.
+  { filename: 'plugin-host-entry.js' },
+  { filename: 'plugin-source-transpile-worker-entry.js' },
   // The forked computer sidecar finds platform runtimes beside itself (#31777).
   { filename: ORCAD_COMPUTER_SIDECAR_ENTRY },
   ...ORCAD_COMPUTER_USE_RUNTIME_ARTIFACTS.map((filename) => ({ filename })),

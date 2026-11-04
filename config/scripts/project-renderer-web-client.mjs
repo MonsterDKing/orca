@@ -20,7 +20,7 @@ const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'))
 const selectedFiles = new Set(['web-index.html'])
 const visitedEntries = new Set()
 const PDFJS_VIEWER_ASSET_DIRS = ['cmaps', 'standard_fonts', 'wasm']
-const TEXT_REFERENCE_OUTPUT = /\.(?:css|html|m?js|svg)$/
+const TEXT_REFERENCE_OUTPUT = /\.(?:css|html|m?js|svg|webmanifest)$/
 
 function assertEntryIsolation() {
   const entryKeys = new Set(

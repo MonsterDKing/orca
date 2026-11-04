@@ -8,6 +8,11 @@ export type SecretStore = {
   /** Report weak/no protection separately from capability: marking weak backends unavailable would skip decryption
    * and hide existing credentials. Null means protected; a message describes the gap. */
   describeProtectionGap(): string | null
+  /** Hosts that can tell OS sealing from a built-in key; others are judged by their gap alone. */
+  assessProtection?(): {
+    level: 'os' | 'obfuscated' | 'unavailable'
+    gap: string | null
+  }
 }
 
 /** Keep the installed store through vi.resetModules; a module-local slot would disappear from re-imported graphs. */

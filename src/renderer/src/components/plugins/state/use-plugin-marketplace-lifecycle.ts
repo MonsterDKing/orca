@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import {
   useEffect,
   useState,
@@ -51,7 +52,7 @@ export function usePluginMarketplaceLifecycle({
   const reloadAfterMutation = async (pluginKeys: string | readonly string[]): Promise<void> => {
     const changed = new Set(typeof pluginKeys === 'string' ? [pluginKeys] : pluginKeys)
     try {
-      const nextPlugins = await window.api.plugins.list()
+      const nextPlugins = await hostPluginsApi()!.list()
       if (!mountedRef.current) {
         return
       }
@@ -72,7 +73,7 @@ export function usePluginMarketplaceLifecycle({
     setBusyPluginKeys((current) => new Set(current).add(pluginKey))
     setRollbackError(null)
     try {
-      const result = await window.api.plugins.rollbackMarketplacePlugin({ pluginKey })
+      const result = await hostPluginsApi()!.rollbackMarketplacePlugin({ pluginKey })
       if (!result.ok) {
         throw new Error(result.error)
       }

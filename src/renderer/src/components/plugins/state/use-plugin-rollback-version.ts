@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useState } from 'react'
 
 /** The version "Roll back" would restore, read when asked; null while loading or when there is none. */
@@ -9,7 +10,7 @@ export function usePluginRollbackVersion(pluginKey: string | null): string | nul
       return
     }
     let stale = false
-    window.api.plugins
+    hostPluginsApi()!
       .getRollbackVersion({ pluginKey })
       .then((version) => {
         if (!stale) {

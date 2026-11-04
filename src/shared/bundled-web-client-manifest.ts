@@ -15,7 +15,7 @@ export function readBundledWebClientFiles(root: string): ReadonlySet<string> | u
     !files.every(
       (file): file is string =>
         typeof file === 'string' &&
-        (file === 'web-index.html' || /^(?:assets|cmaps|standard_fonts|wasm)\//.test(file)) &&
+        (file === 'web-index.html' || /^(?:assets|cmaps|pwa|standard_fonts|wasm)\//.test(file)) &&
         !file.includes('\\') &&
         !file.includes('\0') &&
         file.split('/').every((segment) => segment !== '' && segment !== '.' && segment !== '..') &&

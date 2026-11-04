@@ -44,7 +44,7 @@ vi.mock('../../shared/layout-owner-switch', () => ({
 }))
 vi.mock('../telemetry/client', () => ({ track: vi.fn() }))
 // Isolate reconciliation from the developer’s real global agent configs.
-vi.mock('../codex/codex-hook-reconcile', async (importOriginal) => ({
+vi.mock('../codex/hooks/reconciliation/codex-hook-reconcile', async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
   startCodexHooks: vi.fn()
 }))
@@ -65,6 +65,7 @@ vi.mock('../claude/agent-view/agent-view-service', () => ({
 vi.mock('../opencode/opencode-status-plugin-startup-refresh', () => ({
   refreshInstalledOpenCodeStatusPlugins: vi.fn()
 }))
+vi.mock('./orcad-plugins', () => ({ startOrcadPlugins: async () => {} }))
 vi.mock('./orcad-app-paths', () => ({
   resolveOrcadInstallRoot: () => state.root,
   resolveOrcadPath: () => state.root,

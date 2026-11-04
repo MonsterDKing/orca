@@ -65,7 +65,7 @@ export class PluginPanelController {
 
   /** The live, still-approved panel behind an owner's session: what its push channel serves. */
   sessionCaller(
-    ownerKey: string,
+    ownerKey: string | ((ownerKey: string) => boolean),
     sessionToken: string
   ): { pluginKey: string; caller: PluginPanelCaller } | null {
     const binding = this.sessions.resolve(ownerKey, sessionToken)

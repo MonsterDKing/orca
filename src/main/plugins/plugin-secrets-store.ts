@@ -1,10 +1,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { guardedSafeStorage as safeStorage } from '../host/safe-storage-availability'
-import {
-  assessSecretProtection,
-  type SecretProtectionAssessment
-} from '../host/electron-secret-store'
+import type { SecretProtectionAssessment } from '../host/electron-secret-store'
+import { getSecretStore } from '../../shared/secret-store'
 import { isUnreadableError, writeSecureFile } from '../../shared/secure-file'
 import {
   PLUGIN_STORAGE_KEY_LIMIT,
@@ -12,7 +9,7 @@ import {
 } from '../../shared/plugins/workers/plugin-host-api'
 import { pluginDataDir } from './plugin-storage-store'
 
-// SafeStorage vault writes fail without OS encryption; never fall back to plaintext.
+// Vault writes fail without host encryption; never fall back to plaintext.
 
 type PersistedSecretsFile = {
   version: 1
@@ -26,7 +23,12 @@ const UNREADABLE_VAULT_ERROR = 'secret vault exists but could not be read; refus
 
 /** At-rest protection plugin secrets get; backs the `secrets.protection` host method. */
 export function pluginSecretsProtection(): SecretProtectionAssessment {
-  return assessSecretProtection()
+  const store = getSecretStore()
+  if (store.assessProtection) {
+    return store.assessProtection()
+  }
+  const gap = store.describeProtectionGap()
+  return { level: gap === null ? 'os' : 'unavailable', gap }
 }
 
 export class PluginSecretsStore {
@@ -80,18 +82,20 @@ export class PluginSecretsStore {
     if (typeof ciphertext !== 'string') {
       return { ok: true, value: null }
     }
-    if (!safeStorage.isEncryptionAvailable()) {
+    const secretStore = getSecretStore()
+    if (!secretStore.isEncryptionAvailable()) {
       return { ok: false, error: 'OS-backed encryption is unavailable' }
     }
     try {
-      return { ok: true, value: safeStorage.decryptString(Buffer.from(ciphertext, 'base64')) }
+      return { ok: true, value: secretStore.decryptString(Buffer.from(ciphertext, 'base64')) }
     } catch {
       return { ok: false, error: 'failed to decrypt stored secret' }
     }
   }
 
   set(key: string, value: string): PluginSecretsResult<true> {
-    if (!safeStorage.isEncryptionAvailable()) {
+    const secretStore = getSecretStore()
+    if (!secretStore.isEncryptionAvailable()) {
       return { ok: false, error: 'OS-backed encryption is unavailable; secret not stored' }
     }
     // Why: Linux basic_text seals with a built-in key, which is plaintext to anyone reading the file.
@@ -112,7 +116,12 @@ export class PluginSecretsStore {
     ) {
       return { ok: false, error: `secret vault exceeds the ${PLUGIN_STORAGE_KEY_LIMIT}-key limit` }
     }
-    file.ciphertexts[key] = safeStorage.encryptString(value).toString('base64')
+    try {
+      file.ciphertexts[key] = secretStore.encryptString(value).toString('base64')
+    } catch {
+      // orcad reports encryption available while its key is unloaded, and throws on seal instead.
+      return { ok: false, error: 'host encryption is unavailable; secret not stored' }
+    }
     const nextFile = JSON.stringify(file, null, 2)
     if (Buffer.byteLength(nextFile, 'utf8') > PLUGIN_STORAGE_TOTAL_MAX_BYTES) {
       return { ok: false, error: `secret vault exceeds ${PLUGIN_STORAGE_TOTAL_MAX_BYTES} bytes` }

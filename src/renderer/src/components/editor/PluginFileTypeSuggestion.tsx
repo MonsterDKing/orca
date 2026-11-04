@@ -1,4 +1,5 @@
 // @protected-copy: plugin catalog suggestion banner.
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useEffect, useState } from 'react'
 import { Puzzle } from 'lucide-react'
 import type { PluginFileTypeHostSuggestion } from '../../../../preload/api/plugin-host-api'
@@ -40,7 +41,7 @@ export function PluginFileTypeSuggestion({
       return
     }
     let current = true
-    void window.api.plugins
+    void hostPluginsApi()!
       .suggestForFileType(fileType, purpose)
       .then((next) => {
         if (current) {

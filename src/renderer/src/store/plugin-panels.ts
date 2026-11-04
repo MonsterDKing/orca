@@ -1,3 +1,4 @@
+import { hostPluginsApi, onHostPluginsChanged } from '@/lib/plugin-host-api'
 import { useEffect, useMemo } from 'react'
 import { create } from 'zustand'
 import { ensurePluginAutoUpdatesWatched } from './plugin-auto-updates'
@@ -62,7 +63,7 @@ export const usePluginPanelsStore = create<PluginPanelsState>()((set) => ({
     const generation = ++pluginListGeneration
     clearPluginListRetryTimer()
     // Older paired preload, or a browser client (no `list`): no plugins, so files open in Source.
-    const pluginsApi = window.api?.plugins
+    const pluginsApi = hostPluginsApi()
     if (!pluginsApi?.list) {
       if (generation === pluginListGeneration) {
         pluginListRetryAttempt = 0
@@ -139,9 +140,9 @@ export function ensurePluginPanelsLoaded(): void {
     void fetchPlugins()
   }
   ensurePluginAutoUpdatesWatched()
-  if (!changeSubscriptionStarted && window.api?.plugins?.onChanged) {
+  if (!changeSubscriptionStarted && hostPluginsApi()?.onChanged) {
     changeSubscriptionStarted = true
-    window.api.plugins.onChanged(() => {
+    onHostPluginsChanged(() => {
       void usePluginPanelsStore.getState().fetchPlugins()
     })
   }

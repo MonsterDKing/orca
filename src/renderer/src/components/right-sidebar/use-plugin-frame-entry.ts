@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PluginFrameGuest } from '../../../../shared/plugins/frames/plugin-frame-bridge'
 import { currentPluginFrameTheme } from './plugin-panel-design-token-css'
@@ -43,7 +44,7 @@ export function usePluginFrameEntry(
     // Why: refresh events start overlapping reads; only the newest may set the entry.
     let latestRead = 0
     setEntry({ status: 'loading' })
-    const pluginsApi = window.api?.plugins
+    const pluginsApi = hostPluginsApi()
     if (!pluginsApi) {
       setEntry({ status: 'error' })
       return

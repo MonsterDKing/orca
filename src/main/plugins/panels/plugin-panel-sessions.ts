@@ -60,9 +60,15 @@ export class PluginPanelSessions {
     return token
   }
 
-  resolve(ownerKey: string, token: string): ResolvedPluginPanelSession | null {
+  /** `owner` as a predicate: a read-only stream on a sibling connection of the same client. */
+  resolve(
+    owner: string | ((ownerKey: string) => boolean),
+    token: string
+  ): ResolvedPluginPanelSession | null {
     const session = this.sessions.get(token)
-    if (!session || session.ownerKey !== ownerKey) {
+    const isOwner =
+      typeof owner === 'string' ? session?.ownerKey === owner : session && owner(session.ownerKey)
+    if (!session || !isOwner) {
       return null
     }
     return {

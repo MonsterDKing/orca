@@ -28,6 +28,14 @@ describe('PluginPanelSessions', () => {
     expect(sessions.issue('renderer:1', { ...binding, surface: 'editor' })).not.toBe(token)
   })
 
+  it('lets the owner predicate admit a sibling connection and refuse any other', () => {
+    const sessions = new PluginPanelSessions()
+    const token = sessions.issue('runtime:socket-a', binding)
+
+    expect(sessions.resolve((owner) => owner === 'runtime:socket-a', token)).not.toBeNull()
+    expect(sessions.resolve(() => false, token)).toBeNull()
+  })
+
   it('revokes every session owned by a disconnected transport', () => {
     const sessions = new PluginPanelSessions()
     const first = sessions.issue('connection:one', binding)

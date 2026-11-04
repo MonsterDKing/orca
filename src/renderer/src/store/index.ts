@@ -1,3 +1,4 @@
+import { registerPluginHostStateSource } from '@/lib/plugin-host-api'
 import { registerStructuredSelectionCatalogStore } from '@/lib/structured-agent-session-selection-controller'
 import { canOfferHttpLinkGroupAction } from '@/lib/http-link-in-group-availability'
 import { create, type StateCreator } from 'zustand'
@@ -219,3 +220,5 @@ if ((import.meta.env.DEV || e2eConfig.exposeStore) && typeof window !== 'undefin
     }
   }
 }
+
+registerPluginHostStateSource(useAppStore)

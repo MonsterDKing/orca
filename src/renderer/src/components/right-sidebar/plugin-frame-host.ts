@@ -1,3 +1,4 @@
+import { hostPluginsApi } from '@/lib/plugin-host-api'
 import {
   FRAME_EVENTS,
   PANEL_CONTROL_MESSAGE_MAX_BYTES,
@@ -96,7 +97,7 @@ export type PluginFrameHostOptions = {
 
 /** Return a bridge error when older preloads lack plugins.panelAction. */
 export function callPanelActionViaPreload(call: PanelActionCall): Promise<PluginHostCallOutcome> {
-  const panelAction = window.api?.plugins?.panelAction
+  const panelAction = hostPluginsApi()?.panelAction
   if (!panelAction) {
     return Promise.resolve({
       ok: false,

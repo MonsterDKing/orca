@@ -26,7 +26,9 @@ export const ORCAD_CHILD_ENTRY_POINTS = {
     'src/main/worker-thread-child-process/worker-thread-child-process-entry.ts',
   claudeProfileSetup: 'src/main/claude-accounts/claude-profile-setup-worker-entry.ts',
   sttWorker: 'src/main/speech/stt-worker.ts',
-  computerSidecar: 'src/main/computer/computer-sidecar.ts'
+  computerSidecar: 'src/main/computer/computer-sidecar.ts',
+  pluginHost: 'src/main/plugins/workers/plugin-host-entry.ts',
+  pluginSourceTranspileWorker: 'src/main/plugins/panels/plugin-source-transpile-worker-entry.ts'
 }
 
 /** Each child ships flat beside orcad.js under its source basename; the runtime resolvers look there. */

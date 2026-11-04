@@ -74,6 +74,7 @@
 1 src/renderer/src/components/integrations/source-control/bitbucket-integration-card.tsx
 2 src/renderer/src/components/settings/browser/BrowserPane.tsx
 3 src/renderer/src/components/integrations/source-control/cli-source-control-integration-cards.tsx
+1 src/renderer/src/lib/plugin-host-api.ts # plugin settings have no source row while no workspace is active
 1 src/renderer/src/lib/skill-runtime-command.ts
 1 src/renderer/src/components/settings/general/GeneralPane.tsx
 1 src/renderer/src/components/settings/integrations/IntegrationsPane.tsx

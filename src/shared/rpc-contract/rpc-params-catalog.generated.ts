@@ -6,18 +6,18 @@ import {
   AiVaultSearchRequestSchema,
   AiVaultSearchStatusRequestSchema,
   AiVaultSetSearchEnabledParamsSchema
-} from '../ai-vault-search-contract'
+} from '../ai-vault/search/ai-vault-search-contract'
 import {
   BrowserClientFileChannelAbortParams,
   BrowserClientFileChannelReadParams,
   BrowserClientFileChannelWriteParams
-} from '../browser-client-file-channel-protocol'
+} from '../browser/client-hosting/browser-client-file-channel-protocol'
 import {
   BrowserClientHostAttachParams,
   BrowserClientHostCommandResultParams,
   BrowserNetworkTunnelAttachParams
-} from '../browser-client-host-protocol'
-import { BrowserClientPageMetadataParams } from '../browser-client-page-metadata-protocol'
+} from '../browser/client-hosting/browser-client-host-protocol'
+import { BrowserClientPageMetadataParams } from '../browser/client-hosting/browser-client-page-metadata-protocol'
 import {
   BundledSkillAutoUpdateRequestSchema,
   BundledSkillExecuteRequestSchema,
@@ -28,13 +28,7 @@ import {
   DesktopBrowserBridgeAttachParams,
   DesktopBrowserBridgeResultParams
 } from '../desktop-browser-bridge-protocol'
-import { RegisterDeviceKeyParamsSchema } from '../device-key-registration-contract'
 import { HostAccountLaunchEnvParams } from '../host-account-launch-env'
-import {
-  PairingGetEndpointsParamsSchema,
-  PairingProvisionRelayParamsSchema
-} from '../mobile-relay-credential-contract'
-import { MobileRelayHostWorktreesParamsSchema } from '../mobile-relay-hosts-contract'
 import { MobileWebBundleChunkParamsSchema } from '../mobile-web-bundle/bundle-rpc-contract'
 import { OrcadMigrationBlobChunkRequestSchema } from '../orcad-migration/orcad-migration-blob-transfer'
 import { OrcadMigrationSnapshotChunkRequestSchema } from '../orcad-migration/orcad-migration-scrollback'
@@ -44,6 +38,12 @@ import {
 } from '../orcad-peer-desktops-contract'
 import { OrcadTerminalCensusParamsSchema } from '../orcad-terminal-census'
 import { CrewSubscribeParams } from '../orchestration-crew'
+import { RegisterDeviceKeyParamsSchema } from '../remote-runtime/pairing/device-key-registration-contract'
+import {
+  PairingGetEndpointsParamsSchema,
+  PairingProvisionRelayParamsSchema
+} from '../remote-runtime/relay/mobile-relay-credential-contract'
+import { MobileRelayHostWorktreesParamsSchema } from '../remote-runtime/relay/mobile-relay-hosts-contract'
 import {
   AccountsUnsubscribeParams,
   AddClaudeFromConfigDirParams,
@@ -515,17 +515,24 @@ import {
   PluginDevRequestParams,
   PluginDevUnloadParams,
   PluginGetLogsParams,
+  PluginHostOperationParams,
   PluginInvokeCommandParams,
+  PluginKeyParams,
   PluginOpenParams,
+  PluginPanelPushParams,
+  PluginReadCustomEditorEntryParams,
   PluginReadPanelEntryParams,
+  PluginResolveGitSourceParams,
   PluginRestartParams,
   PluginRpcConsentParams,
   PluginSetEnabledParams,
+  PluginSetSettingParams,
   PluginSetSystemEnabledParams,
   PluginShotChromeParams,
   PluginShotEditorParams,
   PluginShotParams,
   PluginShotReplayParams,
+  PluginSuggestForFileTypeParams,
   PluginsPanelActionParams
 } from './plugins-params'
 import {
@@ -1337,6 +1344,7 @@ export const RPC_PARAMS_BY_METHOD = {
   'pairing.getEndpoints': PairingGetEndpointsParamsSchema,
   'pairing.provisionRelay': PairingProvisionRelayParamsSchema,
   'pairing.registerDeviceKey': RegisterDeviceKeyParamsSchema,
+  'plugins.addMarketplace': PluginHostOperationParams,
   'plugins.consent': PluginRpcConsentParams,
   'plugins.devEmit': PluginDevEmitParams,
   'plugins.devHook': PluginDevEmitParams,
@@ -1344,20 +1352,43 @@ export const RPC_PARAMS_BY_METHOD = {
   'plugins.devLoad': PluginDevLoadParams,
   'plugins.devRequest': PluginDevRequestParams,
   'plugins.devUnload': PluginDevUnloadParams,
+  'plugins.getInstalledManifest': PluginKeyParams,
   'plugins.getLogs': PluginGetLogsParams,
+  'plugins.getRollbackVersion': PluginHostOperationParams,
+  'plugins.getSettings': PluginKeyParams,
+  'plugins.install': PluginHostOperationParams,
+  'plugins.installMarketplacePlugin': PluginHostOperationParams,
   'plugins.invokeCommand': PluginInvokeCommandParams,
   'plugins.list': null,
+  'plugins.listMarketplacePlugins': PluginHostOperationParams,
+  'plugins.listMarketplaces': PluginHostOperationParams,
   'plugins.open': PluginOpenParams,
   'plugins.panelAction': PluginsPanelActionParams,
+  'plugins.panelImage': PluginHostOperationParams,
+  'plugins.panelState': PluginHostOperationParams,
+  'plugins.previewMarketplacePlugin': PluginHostOperationParams,
+  'plugins.previewMarketplaceUpdate': PluginHostOperationParams,
+  'plugins.readCustomEditorEntry': PluginReadCustomEditorEntryParams,
   'plugins.readPanelEntry': PluginReadPanelEntryParams,
   'plugins.refresh': null,
+  'plugins.refreshMarketplaces': PluginHostOperationParams,
+  'plugins.remove': PluginHostOperationParams,
+  'plugins.removeMarketplace': PluginHostOperationParams,
+  'plugins.resolveGitSource': PluginResolveGitSourceParams,
   'plugins.restart': PluginRestartParams,
+  'plugins.rollbackMarketplacePlugin': PluginHostOperationParams,
   'plugins.setEnabled': PluginSetEnabledParams,
+  'plugins.setSetting': PluginSetSettingParams,
   'plugins.setSystemEnabled': PluginSetSystemEnabledParams,
   'plugins.shot': PluginShotParams,
   'plugins.shotChrome': PluginShotChromeParams,
   'plugins.shotEditor': PluginShotEditorParams,
   'plugins.shotReplay': PluginShotReplayParams,
+  'plugins.statusBarState': null,
+  'plugins.subscribeChanges': null,
+  'plugins.subscribePanelPush': PluginPanelPushParams,
+  'plugins.subscribeStatusBar': null,
+  'plugins.suggestForFileType': PluginSuggestForFileTypeParams,
   'preflight.check': PreflightCheck,
   'preflight.detectAgents': PreflightProjectAgentDetection,
   'preflight.detectRemoteAgents': PreflightDetectRemoteAgents,
