@@ -30,6 +30,7 @@ import { readLocalWebUIState } from './web-preferences-store'
 import { callRuntimeResult } from './web-runtime-calls'
 import { requireActiveEnvironmentOrNull } from './web-runtime-session'
 import { UI_STORAGE_KEY, noopUnsubscribe, writeJson } from './web-storage'
+import { createWebWindowShortcutUiApi } from './web-window-shortcuts'
 
 /** Combines browser-local preferences with host persistence; acknowledged writes remain distinct from best-effort writes. */
 export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
@@ -44,6 +45,7 @@ export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
   let zoomLevel = readLocalWebUIState().uiZoomLevel
   return {
     ...createWebJiraFilterStateApi(),
+    ...createWebWindowShortcutUiApi(),
     /** Hydrates from the active host after replaying pending roots, falling back to local state on failure or host changes. */
     get: async () => {
       try {
@@ -204,7 +206,6 @@ export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
       zoomLevel = level
     },
     isMaximized: () => Promise.resolve(false),
-    onOpenSettings: () => noopUnsubscribe,
     // Why: the web client has no native tray/menu bar, so it never queues an open-settings or quit request.
     consumePendingOpenSettings: () => Promise.resolve(false),
     onQuitAndStopAllSessions: () => noopUnsubscribe,
@@ -221,21 +222,6 @@ export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
     onOpenCrashReport: () => noopUnsubscribe,
     // No desktop main process to push state changes; the web client re-reads via ui.get on interaction.
     onStateChanged: () => noopUnsubscribe,
-    onToggleLeftSidebar: () => noopUnsubscribe,
-    onToggleRightSidebar: () => noopUnsubscribe,
-    onToggleWorktreePalette: () => noopUnsubscribe,
-    onToggleFloatingTerminal: () => noopUnsubscribe,
-    onTerminalShortcutCaptured: () => noopUnsubscribe,
-    onOpenQuickOpen: () => noopUnsubscribe,
-    onToggleQuickCommandsMenu: () => noopUnsubscribe,
-    onOpenTasks: () => noopUnsubscribe,
-    onOpenNewWorkspace: () => noopUnsubscribe,
-    onDeleteCurrentWorkspace: () => noopUnsubscribe,
-    onOpenWorkspaceBoard: () => noopUnsubscribe,
-    onToggleAgentDashboard: () => noopUnsubscribe,
-    onJumpToWorktreeIndex: () => noopUnsubscribe,
-    onJumpToTabIndex: () => noopUnsubscribe,
-    onWorktreeHistoryNavigate: () => noopUnsubscribe,
     onRequestTabCreate: () => noopUnsubscribe,
     replyTabCreate: () => {},
     browserTabRequestsReady: () => {},
@@ -257,7 +243,6 @@ export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
     onCloseActiveTab: () => noopUnsubscribe,
     onCloseFloatingItem: () => noopUnsubscribe,
     onSelectFloatingIndex: () => noopUnsubscribe,
-    onSwitchRecentTab: () => noopUnsubscribe,
     onCtrlTabKeyDown: () => noopUnsubscribe,
     onCtrlTabKeyUp: () => noopUnsubscribe,
     onToggleStatusBar: () => noopUnsubscribe,
@@ -295,12 +280,8 @@ export function createWebUiApi(): NonNullable<Partial<PreloadApi>['ui']> {
     // Why: a paired web client has no OS sleep signal; occlusion-driven visibilitychange already covers wake recovery.
     onSystemResumed: () => noopUnsubscribe,
     syncTrafficLights: () => {},
-    setMarkdownEditorFocused: () => {},
     setRichMarkdownContextMenuTarget: () => {},
     markPlainTextContextMenuTarget: () => {},
-    setTerminalInputFocused: () => {},
-    setFloatingFocus: () => {},
-    setShortcutRecorderFocused: () => {},
     onRichMarkdownContextCommand: () => noopUnsubscribe,
     onFullscreenChanged: () => noopUnsubscribe,
     minimize: () => {},

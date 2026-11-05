@@ -24,11 +24,15 @@ import { translate } from '../i18n/i18n'
 import { installOsFileDropCancellationGuard } from '../lib/os-file-drop-cancellation-guard'
 import { installBodyOverlayAttributes } from '../lib/body-overlay-attributes'
 import { installAppKeyboardRouter } from '../lib/app-keyboard-router'
+import { installWebWindowShortcuts } from './preload-api/web-window-shortcuts'
 
 const disposeOsFileDropGuard = installOsFileDropCancellationGuard()
 import.meta.hot?.dispose(disposeOsFileDropGuard)
 const disposeBodyOverlayAttributes = installBodyOverlayAttributes()
 import.meta.hot?.dispose(disposeBodyOverlayAttributes)
+// Registered before the router so it runs first, the way Electron's main process sees keys first.
+const disposeWebWindowShortcuts = installWebWindowShortcuts()
+import.meta.hot?.dispose(disposeWebWindowShortcuts)
 installAppKeyboardRouter()
 const App = lazy(() => import('../App'))
 
